@@ -1,13 +1,29 @@
-# React + Vite
+# 💰 Money Management - Web App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A responsive and user-friendly web application built with React.js to help users manage their personal finances with ease. Users can track income, expenses, and generate insightful reports to better understand their spending habits.
 
-Currently, two official plugins are available:
+## 📌 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🧾 Track daily income and expenses
+- 📊 Generate monthly and yearly financial reports
+- 📈 Visualize financial data through interactive charts
+- 🔍 Filter and search transactions by date and category
+- 🌙 Light/Dark mode toggle
+- 💾 Data persistence with localStorage (or Supabase)
 
-## Expanding the ESLint configuration
+## 🚀 Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-"# Money-Management-Tracker" 
+- **Frontend**: React.js, Tailwind CSS
+- **Icons**: Boxicons
+- **Animations**: AOS (Animate on Scroll)
+- **State Management**: useState, useEffect
+- **Persistence**: LocalStorage / Supabase
+
+
+## 🛠 Setup
+```
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
