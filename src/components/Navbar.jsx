@@ -1,262 +1,213 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { useNavigate, Link } from "react-router-dom";
 import { getUsername } from "../auth/getUsername";
 
 const Navbar = () => {
     const navigate = useNavigate();
-
     const userName = getUsername();
+    const isLoggedIn = userName !== "Guest";
 
     let loggedInUser = { fullName: "Guest", email: "Not logged in" };
     try {
         const userData = localStorage.getItem("loggedInUser");
-        if (userData) {
-            loggedInUser = JSON.parse(userData);
-        }
-    } catch (error) {
-        console.error("Error parsing loggedInUser from localStorage:", error);
+        if (userData) loggedInUser = JSON.parse(userData);
+    } catch (e) {
+        console.error("Error loading user", e);
     }
 
-    const handleClearLocalStorage = () => {
-        Swal.fire({
-            title: 'Are you sure you want to delete all data?',
-            text: "All data in localStorage will be permanently deleted!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete all!',
-            cancelButtonText: 'Cancel',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                localStorage.clear();
-                Swal.fire(
-                    'Deleted!',
-                    'All localStorage data has been deleted.',
-                    'success'
-                ).then(() => {
-                    window.location.reload();
-                });
-            }
-        });
+    const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+    const [notifications] = useState([
+        { id: 1, message: "💰 You added income successfully!" },
+        { id: 2, message: "📊 New report generated" },
+        { id: 3, message: "⚠️ Expense limit approaching!" },
+    ]);
+
+    useEffect(() => {
+        AOS.init({ duration: 1000 });
+        document.body.setAttribute("data-bs-theme", theme);
+    }, [theme]);
+
+    const toggleTheme = () => {
+        const newTheme = theme === "dark" ? "light" : "dark";
+        localStorage.setItem("theme", newTheme);
+        setTheme(newTheme);
     };
 
-    const handleClick = async (e) => {
-        e.preventDefault();
+    const handleLogout = async () => {
         const result = await Swal.fire({
-            title: "Add Income",
-            text: "Are you sure you want to add income?",
+            title: "Logout?",
             icon: "question",
             showCancelButton: true,
             confirmButtonText: "Yes",
-            cancelButtonText: "No",
-            reverseButtons: true,
         });
         if (result.isConfirmed) {
-            navigate("/income");
-        }
-    };
-
-    const handleDeleteAccount = async (e) => {
-        e.preventDefault();
-        if (loggedInUser.email === "Not logged in") {
-            Swal.fire("Error", "Please log in to delete your account.", "error");
-            return;
-        }
-        const result = await Swal.fire({
-            title: "Delete Account",
-            text: "Are you sure you want to delete your account? This action cannot be undone.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes, Delete",
-            cancelButtonText: "No",
-            reverseButtons: true,
-            confirmButtonColor: "#dc3545",
-        });
-        if (result.isConfirmed) {
-
-            let users = [];
-            try {
-                users = JSON.parse(localStorage.getItem("users")) || [];
-            } catch (error) {
-                console.error("Error parsing users from localStorage:", error);
-            }
-            const updatedUsers = users.filter(user => user.email !== loggedInUser.email);
-            localStorage.setItem("users", JSON.stringify(updatedUsers));
             localStorage.removeItem("loggedInUser");
-            Swal.fire("Deleted", "Your account has been deleted.", "success").then(() => {
-                navigate("/login");
-            });
+            Swal.fire({ icon: "success", title: "Logged out", toast: true, timer: 1500 });
+            navigate("/login");
         }
     };
 
-    const handleLogout = async (e) => {
-        e.preventDefault();
-        if (loggedInUser.email === "Not logged in") {
-            Swal.fire("Error", "Please log in to log out.", "error");
-            return;
-        }
+    const handleDeleteAccount = async () => {
         const result = await Swal.fire({
-            title: "Logout",
-            text: "Are you sure you want to log out?",
+            title: "Delete Account?",
+            icon: "warning",
+            confirmButtonText: "Delete",
+            confirmButtonColor: "#dc3545",
+            showCancelButton: true,
+        });
+        if (result.isConfirmed) {
+            const users = JSON.parse(localStorage.getItem("users")) || [];
+            const updated = users.filter(u => u.email !== loggedInUser.email);
+            localStorage.setItem("users", JSON.stringify(updated));
+            localStorage.removeItem("loggedInUser");
+            Swal.fire("Deleted", "Your account is gone.", "success").then(() => navigate("/login"));
+        }
+    };
+
+    const handleAddIncome = async () => {
+        const result = await Swal.fire({
+            title: "Add income?",
             icon: "question",
             showCancelButton: true,
-            confirmButtonText: "Yes, Logout",
-            cancelButtonText: "No",
-            reverseButtons: true,
+            confirmButtonText: "Go",
         });
-        if (result.isConfirmed) {
-            localStorage.removeItem("loggedInUser");
-            Swal.fire("Logged Out", "You have been logged out.", "success").then(() => {
-                navigate("/login");
-            });
-        }
+        if (result.isConfirmed) navigate("/income");
     };
 
-    useEffect(() => {
-        AOS.init({
-            duration: 1000,
-            once: true,
+    const handleClearLocalStorage = () => {
+        Swal.fire({
+            title: "Clear all localStorage?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            confirmButtonText: "Clear All",
+        }).then(res => {
+            if (res.isConfirmed) {
+                localStorage.clear();
+                Swal.fire("Cleared!", "Local storage has been wiped.", "success").then(() =>
+                    window.location.reload()
+                );
+            }
         });
-    }, []);
+    };
 
     return (
-        <nav className="navbar navbar-expand-lg fixed-top py-3 bg-white shadow" data-aos="fade-down" data-aos-duration="1000">
-            <div className="container">
-                <a href="#" className="navbar-brand d-flex align-items-center text-primary" data-aos="fade-down" data-aos-duration="600">
-                    <i className="bx bx-wallet fs-4 me-2"></i>
-                    Money Management
-                </a>
+        <nav
+            className="navbar navbar-expand-lg fixed-top px-4 py-2 shadow-lg glass-nav"
+            data-aos="fade-down"
+        >
+            <div className="container-fluid">
+                <Link to="/" className="navbar-brand d-flex align-items-center text-white fw-bold fs-4">
+                    <i className="bx bx-wallet-alt me-2 fs-3"></i> MoneyManager
+                </Link>
+
                 <button
-                    className="navbar-toggler"
+                    className="navbar-toggler border-0 text-white"
                     type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#navbarNav"
-                    aria-controls="navbarNav"
-                    aria-expanded="false"
-                    aria-label="Toggle navigation"
+                    data-bs-target="#navbarMain"
                 >
-                    <span className="navbar-toggler-icon"></span>
+                    <i className="bx bx-menu fs-2"></i>
                 </button>
-                <div className="collapse navbar-collapse" id="navbarNav">
-                    <ul className="navbar-nav ms-auto d-flex align-items-center" data-aos="fade-down">
-                        <li className="nav-item">
-                            <Link to="/" className="nav-link active" data-aos-delay="800">
-                                <i className="bx bx-home-alt me-1"></i>
-                                Home
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to="/income" className="nav-link" data-aos-delay="700">
-                                <i className="bx bx-dollar-circle me-1"></i>
-                                Income
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to="/expenses" className="nav-link" data-aos-delay="600">
-                                <i className="bx bx-receipt me-1"></i>
-                                Expenses
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to="/reports" className="nav-link" data-aos-delay="500">
-                                <i className="bx bx-bar-chart-alt-2 me-1"></i>
-                                Reports
-                            </Link>
-                        </li>
-                        {userName === "Guest" ? (
-                            <li className="nav-item" data-aos-delay="400">
-                                <Link to="/login" className="nav-link" data-bs-tooltip="tooltip" title="Log in to your account">
-                                    <i className="bx bx-log-in me-1"></i>
-                                    Login
-                                </Link>
-                            </li>
-                        ) : (
-                            <li className="nav-item dropdown" data-aos-delay="400">
-                                <a
-                                    className="nav-link dropdown-toggle d-flex align-items-center"
-                                    href="#"
-                                    id="profileDropdown"
-                                    role="button"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                    data-bs-tooltip="tooltip"
-                                    title="Profile Options"
-                                >
-                                    <i className="bx bx-id-card me-1"></i>
-                                    {userName}
-                                </a>
-                                <div
-                                    className="dropdown-menu dropdown-menu-end border-0 shadow rounded-3 p-3"
-                                    aria-labelledby="profileDropdown"
-                                    data-aos="fade-down"
-                                    data-aos-delay="100"
-                                    style={{ minWidth: "300px" }}
-                                >
-                                    <div className="card border-0">
-                                        <div className="card-body p-3">
-                                            <div className="d-flex align-items-center mb-2 shadow p-2 rounded-3">
-                                                <i className="bx bx-user-circle fs-4 text-primary me-2"></i>
-                                                <div>
-                                                    <h6 className="fw-bold mb-0">{userName}</h6>
-                                                    <small className="text-muted">{loggedInUser.email}</small>
-                                                </div>
-                                            </div>
-                                            <hr className="my-2" />
-                                            <button
-                                                className="btn btn-outline-danger w-100 rounded-3 mb-2"
-                                                onClick={handleDeleteAccount}
-                                                data-bs-tooltip="tooltip"
-                                                title="Delete your account"
-                                            >
-                                                <i className="bx bx-trash me-1"></i>
-                                                Delete Account
-                                            </button>
 
-                                            <button
-                                                className="btn btn-outline-warning w-100 rounded-3 mb-2"
-                                                onClick={handleClearLocalStorage}
-                                                data-bs-tooltip="tooltip"
-                                                title="Clear all localStorage data"
-                                            >
-                                                <i className="bx bx-trash me-1"></i>
-                                                Delete All Data
-                                            </button>
+                <div className="collapse navbar-collapse" id="navbarMain">
+                    <ul className="navbar-nav ms-auto align-items-center gap-2">
+                        <li className="nav-item">
+                            <Link to="/" className="nav-link text-white">Home</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link to="/income" className="nav-link text-white">Income</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link to="/expenses" className="nav-link text-white">Expenses</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link to="/reports" className="nav-link text-white">Reports</Link>
+                        </li>
 
-                                            <button
-                                                className="btn btn-outline-primary w-100 rounded-3"
-                                                onClick={handleLogout}
-                                                data-bs-tooltip="tooltip"
-                                                title="Log out of your account"
-                                            >
-                                                <i className="bx bx-log-out me-1"></i>
-                                                Logout
-                                            </button>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                        )}
-                        <li className="nav-item" data-aos-delay="300">
+                        {/* Notification Bell */}
+                        <li className="nav-item dropdown">
                             <a
                                 href="#"
-                                className="btn btn-primary btn-sm ms-lg-3 mt-2 mt-lg-0 d-flex align-items-center shadow-lg justify-content-center"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="right"
-                                onClick={handleClick}
-                                title="Add Income"
+                                className="nav-link dropdown-toggle text-white position-relative"
+                                data-bs-toggle="dropdown"
                             >
-                                <i className="bx bx-plus me-1"></i>
-                                Add Income
+                                <i className="bx bx-bell fs-5"></i>
+                                <span className="position-absolute top-0 start-100 translate-middle badge bg-danger rounded-pill">
+                                    {notifications.length}
+                                </span>
                             </a>
+                            <ul className="dropdown-menu dropdown-menu-end rounded-4 glass-dropdown shadow-sm p-2">
+                                {notifications.map(n => (
+                                    <li key={n.id} className="dropdown-item small">
+                                        {n.message}
+                                    </li>
+                                ))}
+                            </ul>
+                        </li>
+
+                        {/* Dark Mode */}
+                        <li className="nav-item">
+                            <button
+                                className="btn btn-outline-light rounded-circle p-2"
+                                onClick={toggleTheme}
+                                title="Toggle Dark Mode"
+                            >
+                                <i className={`bx ${theme === "light" ? "bx-moon" : "bx-sun"} fs-5`}></i>
+                            </button>
+                        </li>
+
+                        {/* User Avatar */}
+                        <li className="nav-item dropdown ms-2">
+                            <a
+                                href="#"
+                                className="nav-link dropdown-toggle d-flex align-items-center text-white"
+                                data-bs-toggle="dropdown"
+                            >
+                                <img
+                                    src={`https://api.dicebear.com/7.x/initials/svg?seed=${userName}`}
+                                    alt="avatar"
+                                    width="32"
+                                    height="32"
+                                    className="rounded-circle me-2"
+                                />
+                                <span>{userName}</span>
+                            </a>
+                            <ul className="dropdown-menu dropdown-menu-end rounded-4 shadow glass-dropdown p-2">
+                                <li className="dropdown-item small text-muted">{loggedInUser.email}</li>
+                                <li><hr className="dropdown-divider" /></li>
+                                <li><button className="dropdown-item" onClick={handleAddIncome}><i className="bx bx-plus me-2"></i>Add Income</button></li>
+                                <li><button className="dropdown-item" onClick={handleClearLocalStorage}><i className="bx bx-reset me-2"></i>Clear Data</button></li>
+                                <li><button className="dropdown-item text-danger" onClick={handleDeleteAccount}><i className="bx bx-trash me-2"></i>Delete Account</button></li>
+                                <li><button className="dropdown-item text-primary" onClick={handleLogout}><i className="bx bx-log-out me-2"></i>Logout</button></li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
             </div>
+
+            {/* Glassmorphism CSS */}
+            <style>{`
+        .glass-nav {
+          background: rgba(34, 34, 34, 0.6);
+          backdrop-filter: blur(12px);
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .glass-dropdown {
+          backdrop-filter: blur(15px);
+          background: rgba(255, 255, 255, 0.8);
+        }
+        [data-bs-theme="dark"] .glass-dropdown {
+          background: rgba(33, 33, 33, 0.9);
+          color: white;
+        }
+        .dropdown-item:hover {
+          background: rgba(0,0,0,0.05);
+        }
+      `}</style>
         </nav>
     );
 };
