@@ -49,7 +49,7 @@ const Footer = () => {
                                 `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`,
                                 {
                                     headers: {
-                                        'User-Agent': 'MoneyManagementTracker/1.0'
+                                        'User-Agent': 'MoneyManagement/1.0'
                                     }
                                 }
                             );
@@ -128,30 +128,60 @@ const Footer = () => {
                             <div className="d-flex align-items-center mb-4">
                                 <i className='bx bx-wallet fs-1 me-3' style={{ color: '#00a8ff' }}></i>
                                 <h4 className="mb-0 fw-bold" style={{ color: '#ffffff', textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)' }}>
-                                    Money Management Tracker
+                                    Money Management
                                 </h4>
                             </div>
                             <p className="mb-4" style={{ color: '#b0b0b0', lineHeight: '1.6' }}>
                                 Empower your financial journey with our cutting-edge money management platform.
                                 Track income, optimize expenses, and achieve your goals with ease.
                             </p>
-                            <div className="d-flex gap-3" data-aos="fade-up" data-aos-delay="300">
-                                {['facebook-circle', 'twitter', 'instagram', 'linkedin'].map((platform, index) => (
+                            <div
+                                className="d-flex gap-3"
+                                data-aos="fade-up"
+                                data-aos-delay="300"
+                            >
+                                {[
+                                    {
+                                        platform: 'facebook-circle',
+                                        url: 'https://www.facebook.com/PhatAlexVo',
+                                    },
+                                    {
+                                        platform: 'twitter',
+                                        url: '#',
+                                    },
+                                    {
+                                        platform: 'instagram',
+                                        url: 'https://www.instagram.com/vot.phat.334/?igsh=OTNsNXVkaGFkdnJr&utm_source=qr',
+                                    },
+                                    {
+                                        platform: 'linkedin',
+                                        url: 'https://www.linkedin.com/in/phat-vo-thanh-39a791329/',
+                                    },
+                                ].map(({ platform, url }) => (
                                     <a
                                         key={platform}
-                                        href="#"
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="fs-4"
                                         style={{
                                             color: '#00a8ff',
-                                            transition: 'transform 0.3s ease, color 0.3s ease'
+                                            transition: 'transform 0.3s ease, color 0.3s ease',
                                         }}
-                                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'scale(1.3)';
+                                            e.currentTarget.style.color = '#0984e3';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'scale(1)';
+                                            e.currentTarget.style.color = '#00a8ff';
+                                        }}
                                     >
                                         <i className={`bx bxl-${platform}`}></i>
                                     </a>
                                 ))}
                             </div>
+
                         </div>
 
                         <div className="col-lg-2 col-md-6" data-aos="fade-up" data-aos-delay="400">
@@ -299,10 +329,10 @@ const Footer = () => {
                             </div>
                             <div className="contact-info">
                                 <p className="small mb-2" style={{ color: '#e0e0e0' }}>
-                                    <i className='bx bx-phone me-2' style={{ color: '#00a8ff' }}></i>+6287760347478
+                                    <i className='bx bx-phone me-2' style={{ color: '#00a8ff' }}></i>+84 366954442
                                 </p>
                                 <p className="small mb-2" style={{ color: '#e0e0e0' }}>
-                                    <i className='bx bx-envelope me-2' style={{ color: '#00a8ff' }}></i>moneytracker@gmail.com
+                                    <i className='bx bx-envelope me-2' style={{ color: '#00a8ff' }}></i>phatvo779@gmail.com
                                 </p>
                                 <p className="small mb-0" style={{ color: '#e0e0e0' }}>
                                     <i className='bx bx-map me-2' style={{ color: '#00a8ff' }}></i>{userLocation}
@@ -323,7 +353,7 @@ const Footer = () => {
                             <div className="col-md-6 text-center text-md-start" data-aos="fade-right" data-aos-delay="900">
                                 <p className="mb-0 small" style={{ color: '#e0e0e0', textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)' }}>
                                     <i className='bx bx-copyright me-2' style={{ color: '#00a8ff' }}></i>
-                                    {currentYear} Money Management Tracker. All rights reserved.
+                                    {currentYear} Money Management. All rights reserved.
                                 </p>
                             </div>
                             <div className="col-md-6 text-center text-md-end" data-aos="fade-left" data-aos-delay="900">
